@@ -1,0 +1,31 @@
+# For local development with Postgres
+# TODO: Configure services for production
+version: '3.8'
+services:
+  db:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=tab_user
+      - POSTGRES_PASSWORD=tab_password
+      - POSTGRES_DB=tab_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      # TODO: Use a secrets management solution for production
+      - DATABASE_URL=postgresql://tab_user:tab_password@db/tab_db
+      - SECRET_KEY=your_super_secret_key_change_me
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+volumes:
+  postgres_data: 

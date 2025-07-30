@@ -1,0 +1,42 @@
+# Use a standard Ubuntu base image
+FROM ubuntu:22.04
+
+# Avoid interactive prompts during installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install necessary dependencies: curl, wget, build-essential, libssl-dev, pkg-config, etc.
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    build-essential \
+    libssl-dev \
+    pkg-config \
+    libwebkit2gtk-4.0-dev \
+    libappindicator3-dev \
+    librsvg2-dev \
+    patchelf \
+    git
+
+# Install Node.js and pnpm
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+RUN apt-get install -y nodejs
+RUN npm install -g pnpm
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+WORKDIR /app
+
+# Copy only the package.json files to leverage Docker cache
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install
+
+# Copy the rest of the application code
+COPY . .
+
+# Expose the Vite dev server port
+EXPOSE 1420
+
+# Run the Tauri development server
+CMD ["pnpm", "tauri", "dev"] 

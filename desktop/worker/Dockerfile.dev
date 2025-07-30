@@ -1,0 +1,17 @@
+# Use a Python base image
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install Poetry
+RUN pip install poetry
+
+# Copy only the dependency files to leverage Docker cache
+COPY pyproject.toml poetry.lock* ./
+RUN poetry install --no-root
+
+# Copy the rest of the application code
+COPY . .
+
+# This container will be used for interactive development,
+# so we don't need a default command. 

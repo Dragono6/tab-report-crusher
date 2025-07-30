@@ -1,0 +1,40 @@
+name: Build Tauri App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'pnpm'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend dependencies
+        run: cd desktop && pnpm install
+
+      - name: Build Tauri MSI
+        uses: tauri-apps/tauri-action@v0
+        with:
+          projectPath: desktop
+          # TODO: Add secrets for signing the MSI
+          # tauri-sign-private-key: ${{ secrets.TAURI_SIGN_PRIVATE_KEY }}
+          # tauri-sign-private-key-password: ${{ secrets.TAURI_SIGN_PRIVATE_KEY_PASSWORD }}
+
+      - name: Upload MSI artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: tab-report-crusher-installer
+          path: desktop/src-tauri/target/release/bundle/msi/*.msi 

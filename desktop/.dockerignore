@@ -1,0 +1,13 @@
+# Ignore the node_modules directory to prevent issues with long file paths on Windows
+# and to avoid copying unnecessary files into the build context.
+node_modules
+
+# Ignore build artifacts
+dist
+src-tauri/target
+
+# Ignore IDE and OS files
+.idea
+.vscode
+*.log
+.DS_Store 
