@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # The cloud/api service is already defined in its own docker-compose.yml
+  # We can include it here if we want to manage all services from one place.
+  # For now, we focus on the desktop app.
+
+  frontend:
+    build:
+      context: ./desktop
+      dockerfile: Dockerfile.dev
+    ports:
+      - "1420:1420" # Tauri dev server
+    volumes:
+      - ./desktop:/app
+      # This will cache node_modules between runs
+      - node_modules:/app/node_modules
+    # Keep the container running
+    command: pnpm tauri dev
+
+  worker:
+    build:
+      context: ./desktop/worker
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./desktop/worker:/app
+    # Keep the container running
+    command: tail -f /dev/null
+
+volumes:
+  node_modules:
+
+networks:
+  default:
+    name: tab-crusher-net 
